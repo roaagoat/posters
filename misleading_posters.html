@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  :root {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-mono: 'Courier New', monospace;
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f5f4f1;
+    --color-background-tertiary: #eeece8;
+    --color-text-primary: #1a1916;
+    --color-text-secondary: #6b6860;
+    --color-text-tertiary: #9c9a94;
+    --color-border-tertiary: rgba(0,0,0,0.12);
+    --color-border-secondary: rgba(0,0,0,0.22);
+    --color-border-primary: rgba(0,0,0,0.35);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 12px; background: #fff; font-family: var(--font-sans); }
+</style>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+.wrap { padding: 1.5rem 0; font-family: var(--font-sans); }
+.progress-bar { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+.pip { height: 4px; flex: 1; border-radius: 2px; background: var(--color-border-tertiary); transition: background 0.3s; }
+.pip.done { background: var(--color-border-secondary); }
+.pip.active { background: #fff; opacity: 0.9; }
+.poster { border-radius: var(--border-radius-lg); padding: 2rem 1.75rem 1.25rem; display: flex; flex-direction: column; justify-content: space-between; min-height: 260px; position: relative; overflow: hidden; border: 0.5px solid rgba(255,255,255,0.1); transition: opacity 0.2s; }
+.headline { font-weight: 500; line-height: 1.2; }
+.sub { font-weight: 400; margin-top: 6px; opacity: 0.9; }
+.fine-print { font-size: 9px; line-height: 1.4; margin-top: auto; padding-top: 1.25rem; opacity: 0.55; letter-spacing: 0.01em; }
+.tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 0.75rem; }
+.badge { position: absolute; top: 1.5rem; right: 1.5rem; width: 72px; height: 72px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.badge span:first-child { font-size: 11px; font-weight: 500; }
+.badge span:last-child { font-size: 22px; font-weight: 500; line-height: 1; }
+.sticker { position: absolute; top: 1.25rem; right: 1.5rem; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: var(--border-radius-md); transform: rotate(3deg); }
+.percent { font-size: 72px; font-weight: 500; line-height: 1; margin: 0.5rem 0; }
+.percent span { font-size: 22px; vertical-align: super; }
+.inf { font-size: 64px; font-weight: 500; line-height: 1; margin: 0.25rem 0; letter-spacing: -2px; }
+.icon-row { display: flex; gap: 6px; margin-top: 10px; }
+.nav { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; }
+.nav-btn { font-size: 13px; padding: 7px 16px; cursor: pointer; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: none; color: var(--color-text-primary); display: flex; align-items: center; gap: 6px; }
+.nav-btn:hover { background: var(--color-background-secondary); }
+.nav-btn:disabled { opacity: 0.3; cursor: default; }
+.counter { font-size: 13px; color: var(--color-text-tertiary); }
+.poster-wrap { position: relative; }
+.mistake-label { display: none; position: absolute; top: 1rem; left: 1rem; background: rgba(0,0,0,0.55); color: #fff; font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+</style>
+
+<h2 class="sr-only">Misleading advertising posters — navigate one by one and spot the hidden fine print.</h2>
+
+<div class="wrap">
+  <div class="progress-bar" id="pips"></div>
+  <div class="poster-wrap">
+    <div id="poster-area"></div>
+  </div>
+  <div class="nav">
+    <button class="nav-btn" id="prev-btn" onclick="navigate(-1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Previous</button>
+    <span class="counter" id="counter"></span>
+    <button class="nav-btn" id="next-btn" onclick="navigate(1)">Next <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+  </div>
+</div>
+
+<script>
+const posters = [
+  {
+    cls: 'p1',
+    bg: '#E24B4A',
+    html: `
+      <div class="badge"><span style="color:#A32D2D">FREE</span><span style="color:#E24B4A">!</span></div>
+      <div>
+        <div class="tag" style="background:#fff;color:#A32D2D">Limited time offer</div>
+        <div class="headline" style="color:#fff;font-size:36px">Buy one,<br>get one free.</div>
+        <div class="sub" style="color:#FBEAF0;font-size:15px">Stock up today and save big.</div>
+      </div>
+      <div class="fine-print" style="color:#F7C1C1">*Free item of equal or lesser value applies only when purchasing the Premium Annual Membership Plan at full price. Offer excludes sale, clearance, bundled, and third-party items. One redemption per household. Cannot be combined with any other offer, coupon, or discount. Valid in participating locations only. Offer subject to change without notice.</div>`,
+    trap: 'Only applies when buying the Premium Annual Plan at full price'
+  },
+  {
+    cls: 'p2',
+    bg: '#185FA5',
+    html: `
+      <div class="sticker" style="background:#FAC775;color:#633806">Today only!</div>
+      <div>
+        <div class="tag" style="background:#FAC775;color:#633806">Flash sale</div>
+        <div class="headline" style="color:#fff;font-size:42px">Up to 50%<br>off everything!</div>
+        <div class="sub" style="color:#B5D4F4;font-size:14px">Biggest sale of the year — don't miss it.</div>
+      </div>
+      <div class="fine-print" style="color:#85B7EB">*Discount applies to selected items only. Excludes new arrivals (items added in the last 90 days), sale and clearance items, branded and licensed products, electronics, gift cards, and items marked "not eligible for promotion." Percentage savings calculated on original ticketed price. While stocks last.</div>`,
+    trap: '"Everything" excludes new arrivals, sale items, electronics, gift cards, and branded products'
+  },
+  {
+    cls: 'p3',
+    bg: '#085041',
+    html: `
+      <div>
+        <div class="tag" style="background:#1D9E75;color:#E1F5EE">No commitment</div>
+        <div class="headline" style="color:#fff;font-size:28px">Join free —<br>no credit card needed!</div>
+        <div class="icon-row">
+          <i class="ti ti-circle-check" style="font-size:20px;color:#5DCAA5" aria-hidden="true"></i>
+          <i class="ti ti-circle-check" style="font-size:20px;color:#5DCAA5" aria-hidden="true"></i>
+          <i class="ti ti-circle-check" style="font-size:20px;color:#5DCAA5" aria-hidden="true"></i>
+        </div>
+        <div class="sub" style="color:#9FE1CB;font-size:14px;margin-top:8px">Start your free trial in seconds.</div>
+      </div>
+      <div class="fine-print" style="color:#5DCAA5;opacity:0.5">*Free trial valid for 7 days. After trial period, account automatically converts to a paid subscription at $49.99/month or $499/year. Credit card required to continue after trial. Cancel anytime before trial ends to avoid charges. Cancellation takes effect at the end of the current billing cycle.</div>`,
+    trap: 'Auto-converts to $49.99/month after 7 days — card required to continue'
+  },
+  {
+    cls: 'p4',
+    bg: '#F1EFE8',
+    html: `
+      <div>
+        <div class="tag" style="background:#2C2C2A;color:#F1EFE8">Science-backed</div>
+        <div class="headline" style="color:#2C2C2A;font-size:24px">Clinically proven to reduce stress.</div>
+        <div class="percent" style="color:#2C2C2A"><span></span>40<span>%</span></div>
+        <div class="sub" style="color:#5F5E5A;font-size:14px">Feel the difference in just 2 weeks.</div>
+      </div>
+      <div class="fine-print" style="color:#888780">*Results based on a self-reported participant survey conducted internally (n=12, ages 24–31, over a 14-day period). Individual results may vary. This product is not intended to diagnose, treat, cure, or prevent any medical condition. Consult a healthcare professional before use.</div>`,
+    trap: '"Clinically proven" = 12 people filling out a self-reported form'
+  },
+  {
+    cls: 'p5',
+    bg: '#26215C',
+    html: `
+      <div>
+        <div class="tag" style="background:#7F77DD;color:#EEEDFE">Best value plan</div>
+        <div class="inf" style="color:#7F77DD">∞</div>
+        <div class="headline" style="color:#fff;font-size:34px">Unlimited data.<br>No limits, ever.</div>
+        <div class="sub" style="color:#AFA9EC;font-size:14px">Stream, scroll, and share without worry.</div>
+      </div>
+      <div class="fine-print" style="color:#534AB7;opacity:0.8">*Unlimited data subject to our Fair Usage Policy. After 20GB of high-speed data usage per billing cycle, speeds will be reduced to 128kbps for the remainder of the cycle. Full speeds resume at the start of your next billing period. Network management policies may apply during periods of congestion.</div>`,
+    trap: 'Speed drops to 128kbps (2G) after 20GB — effectively not unlimited'
+  }
+];
+
+let current = 0;
+
+function renderPips() {
+  const c = document.getElementById('pips');
+  c.innerHTML = '';
+  posters.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i < current ? ' done' : i === current ? ' active' : '');
+    c.appendChild(pip);
+  });
+}
+
+function renderPoster() {
+  const p = posters[current];
+  document.getElementById('poster-area').innerHTML = `
+    <div class="poster" style="background:${p.bg}">
+      ${p.html}
+    </div>
+  `;
+  document.getElementById('counter').textContent = `${current + 1} of ${posters.length}`;
+  document.getElementById('prev-btn').disabled = current === 0;
+  document.getElementById('next-btn').disabled = current === posters.length - 1;
+}
+
+function navigate(dir) {
+  current = Math.max(0, Math.min(posters.length - 1, current + dir));
+  renderPips();
+  renderPoster();
+}
+
+renderPips();
+renderPoster();
+</script>
+</body></html>
